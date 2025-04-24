@@ -24,22 +24,38 @@ MIDIIn.connectAll;
 
 	~audioBuss = CtkAudio.play(2, server: ~server);
 
-	~start = 0;
+	~proc = ProcModR.new(
+		env: Env([0, 1, 0], [10, 10], 'sin', 1),
+		amp: 2,
+		numChannels: 2,
+		procout: ~audioBuss,
+		id: 'test',
+		server: ~server,
+		function: { |group, routebus, server, pmod|
+			[pmod, group, routebus, server].postln;
+			// collect a new CtkNote and make sure the note is added to the group
+			Task({
+				loop({     // loop the whole thing
+					~buffer = ~buffers.choose;
+					~myPlayBufPNotes[\dxarts46x_stereoPlayBuf].note(target: group)
+					.dur_(~buffer.duration)
+					.rate_(~rate)
+					.panAngle_(~panAngle)
+					.bufnum_(~buffer)
+					.outBus_(routebus)
+					.loop_(0)
+					.play;
+					~wait.wait
+				})
+			})
+		}
+	);
 
-	~task = Task({
-		loop({     // loop the whole thing
-			~buffer = ~buffers.choose;
-			~myPlayBufPNotes[\dxarts46x_stereoPlayBuf].note
-			.dur_(~buffer.duration)
-			.rate_(~rate)
-			.panAngle_(~panAngle)
-			.bufnum_(~buffer)
-			.outBus_(0)
-			.loop_(0)
-			.play;
-			~wait.wait
-		})
-	});
+	~events = ProcEvents.new([
+		[~proc, nil], // play the first procmod and release nothing
+		[nil, ~proc] // play nothing and release a procmod
+	], 1, nil, nil, 'test'
+	);
 
 	~reverbNote = ~myPlayBufPNotes[\reverb].note(addAction: 'tail').in_(~audioBuss).play;
 
@@ -55,12 +71,14 @@ MIDIIn.connectAll;
 		~wait = ~waitSpec.map(val.linlin(0, 127, 0, 1))
 	}, ccNum: 1);
 
-	~toggle = MIDIFunc.cc({ |val, num, chan, src|
+	~start = MIDIFunc.cc({ |val, num, chan, src|
 		(val == 127).if({~task.play});
-		(val == 0).if({~task.stop});
 	}, 64);
 
 
 });
 
 )
+
+// Create a MIDI button to cycle through ProcEvents.
+// Use MIDI to control your synth parameters.
