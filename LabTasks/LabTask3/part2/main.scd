@@ -75,7 +75,6 @@ MIDIIn.connectAll;
 		(val == 127).if({~task.play});
 	}, 64);
 
-
 });
 
 )

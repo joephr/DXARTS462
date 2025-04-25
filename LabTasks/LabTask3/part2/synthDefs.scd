@@ -14,7 +14,6 @@ For examples see:
 HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 */
 
-
 // -------------------------
 // instantiate CtkProtoNotes
 ~myPlayBufPNotes = CtkProtoNotes.new;  // protoNote dict for playing soundfiles

@@ -60,7 +60,6 @@ MIDIIn.connectAll;
 		(val == 0).if({~task.stop});
 	}, 64);
 
-
 });
 
 )
