@@ -20,7 +20,7 @@ MIDIIn.connectAll;
 
 	~panSpec = ControlSpec(45, -45, 'lin');
 
-	~waitSpec = ControlSpec(0.2, 2, 'lin');
+/*	~waitSpec = ControlSpec(0.2, 2, 'lin');*/
 
 	~audioBuss = CtkAudio.play(2, server: ~server);
 
@@ -42,10 +42,10 @@ MIDIIn.connectAll;
 					.rate_(~rate)
 					.panAngle_(~panAngle)
 					.bufnum_(~buffer)
-					.outBus_(routebus)
+					.outBus_(0)
 					.loop_(0)
 					.play;
-					~wait.wait
+					~buffer.duration.wait
 				})
 			})
 		}
@@ -57,7 +57,7 @@ MIDIIn.connectAll;
 	], 1, nil, nil, 'test'
 	);
 
-	~reverbNote = ~myPlayBufPNotes[\reverb].note(addAction: 'tail').in_(~audioBuss).play;
+	//~reverbNote = ~myPlayBufPNotes[\reverb].note(addAction: 'tail').in_(~audioBuss).play;
 
 	~midiRate = MIDIFunc.cc({ |val, num, chan, src|
 		~rate = ~rateSpec.map(val.linlin(0, 127, 0, 1))
@@ -67,12 +67,13 @@ MIDIIn.connectAll;
 		~panAngle = ~panSpec.map(val.linlin(0, 127, 0, 1))
 	}, ccNum: 23);
 
-	~midiWait = MIDIFunc.cc({ |val, num, chan, src|
+/*	~midiWait = MIDIFunc.cc({ |val, num, chan, src|
 		~wait = ~waitSpec.map(val.linlin(0, 127, 0, 1))
-	}, ccNum: 1);
+	}, ccNum: 1);*/
 
 	~start = MIDIFunc.cc({ |val, num, chan, src|
-		(val == 127).if({~task.play});
+		(val == 127).if({~proc.play});
+		(val == 0).if({~proc.release});
 	}, 64);
 
 });
@@ -80,4 +81,5 @@ MIDIIn.connectAll;
 )
 
 // Create a MIDI button to cycle through ProcEvents.
+// Use MIDI to control your synth parameters.
 // Use MIDI to control your synth parameters.
