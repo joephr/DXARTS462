@@ -20,7 +20,7 @@ MIDIIn.connectAll;
 
 	~panSpec = ControlSpec(45, -45, 'lin');
 
-/*	~waitSpec = ControlSpec(0.2, 2, 'lin');*/
+	~waitSpec = ControlSpec(0.2, 5, 'lin');
 
 	~audioBuss = CtkAudio.play(2, server: ~server);
 
@@ -38,14 +38,14 @@ MIDIIn.connectAll;
 				loop({     // loop the whole thing
 					~buffer = ~buffers.choose;
 					~myPlayBufPNotes[\dxarts46x_stereoPlayBuf].note(target: group)
-					.dur_(~buffer.duration)
+					.dur_(~buffer.duration / ~rate)
 					.rate_(~rate)
 					.panAngle_(~panAngle)
 					.bufnum_(~buffer)
 					.outBus_(0)
 					.loop_(0)
 					.play;
-					~buffer.duration.wait
+					~wait.wait
 				})
 			})
 		}
@@ -67,12 +67,14 @@ MIDIIn.connectAll;
 		~panAngle = ~panSpec.map(val.linlin(0, 127, 0, 1))
 	}, ccNum: 23);
 
-/*	~midiWait = MIDIFunc.cc({ |val, num, chan, src|
+	~midiWait = MIDIFunc.cc({ |val, num, chan, src|
 		~wait = ~waitSpec.map(val.linlin(0, 127, 0, 1))
-	}, ccNum: 1);*/
+	}, ccNum: 1);
 
 	~start = MIDIFunc.cc({ |val, num, chan, src|
-		(val == 127).if({~proc.play});
+		(val == 127).if({~proc.play;
+			"hi".postln
+		});
 		(val == 0).if({~proc.release});
 	}, 64);
 
