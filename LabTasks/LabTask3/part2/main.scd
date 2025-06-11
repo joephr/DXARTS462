@@ -20,7 +20,7 @@ MIDIIn.connectAll;
 
 	~panSpec = ControlSpec(45, -45, 'lin');
 
-	~waitSpec = ControlSpec(0.2, 5, 'lin');
+	~waitSpec = ControlSpec(0.1, 2, 'lin');
 
 	~audioBuss = CtkAudio.play(2, server: ~server);
 

@@ -75,9 +75,9 @@ HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 		}
 	),
 
-	SynthDef('reverb', { |in, out = 0|
+	SynthDef('reverb', { |in, mix = 0.7, out = 0|
 		var src;
 		src = In.ar(in, 2); // stereo buss
-		Out.ar(out, FreeVerb2.ar(src[0], src[1], 0.7, 0.7, 0.2))
+		Out.ar(out, FreeVerb2.ar(src[0], src[1], mix, 0.7, 0.2))
 	})
 );

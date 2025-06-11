@@ -1,27 +1,8 @@
-/*
-Project Title: myLastName-projectFinal
-Date: Mon Jan 22 14:56:47 2024
-
-DXARTS 46x: Sound Series Tutorial
-Authors: Joseph Anderson, Wei Yang, et al.
-Affiliation: DXARTS, University of Washington (https://dxarts.washington.edu/)
-License: GPLv3 (https://www.gnu.org/licenses/gpl-3.0.en.html)
-*/
-
-/*
-For examples see:
-
-HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
-*/
-
 
 // -------------------------
 // instantiate CtkProtoNotes
-
-~myRissetBellPNotes = CtkProtoNotes.new;
-~myPlayBufPNotes = CtkProtoNotes.new;
-~myWarp1ShufflePNotes = CtkProtoNotes.new;
-~myGrainBufPNotes = CtkProtoNotes.new;
+(
+~myPlayBufPNotes = CtkProtoNotes.new;  // protoNote dict for playing soundfiles
 
 
 // -------------------------
@@ -30,153 +11,8 @@ HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 ~myPlayBufPNotes.add(
 
 	/*
-	Enveloped mono PlayBuf
+	Enveloped stereo PlayBuf
 	*/
-	SynthDef.new(
-		\dxarts46x_monoPlayBuf,  // name - as Symbol
-
-		{ |dur = 1.0, gain = 0.0, riseTime = 0.01, decayTime = 0.01, rate = 1, panAngle = 0,
-			loop = 0, bufnum = 0, outBus = 0|  // UGen graph function
-
-			// vars for UGens
-			var ampEnvSig;
-			var playBufSig;
-			var panSig;
-			var outSig;
-
-			// vars for control
-			var numChannels = 1; // <-- mono buffer - must be set in the UGen graph function!
-			var amp = gain.dbamp;
-			var pos = panAngle.neg / 45;
-
-			// ----
-			// synthesis
-
-			// amplitude envelope
-			ampEnvSig = EnvGen.kr(
-				Env.linen(riseTime, dur - (riseTime + decayTime), decayTime),  // Env: *linen
-				levelScale: amp,
-			);  // EnvGen (control rate)
-
-			// sample playback
-			playBufSig = PlayBuf.ar(numChannels, bufnum,  BufRateScale.kr(bufnum) * rate, loop: loop);
-
-			// apply -linen envelope
-			// ... reuse playBufSig var
-			// NOTE: we could have just passed ampEnvSig to the level arg of Pan2
-			playBufSig = playBufSig * ampEnvSig;
-
-			// stereo imager
-			panSig = Pan2.ar(playBufSig, pos);  // Pan2 (audio rate)
-
-			// assign to out
-			outSig = panSig;
-
-			Out.ar(
-				outBus,  // out bus - set as an argument
-				outSig
-			)  // Out (audio rate)
-		}
-	)
-);
-
-~myRissetBellPNotes.add(
-	SynthDef.new(
-		\pulseSinOsc,  // name - as Symbol
-
-		{ |dur = 1.0, gain = -14.0, riseTime = 0.1, decayTime = 0.5, curve = -4.0, pulseRate = 2.0, pulseDepth = 0.5, freq = 440.0, panAngle = 0, outBus = 0|  // UGen graph function
-
-			// vars for UGens
-			var ampEnvSig;
-			var pulseModSig;
-			var sinSig;
-			var panSig;
-			var outSig;
-
-			// vars for control
-			var sustainTime = dur - (riseTime + decayTime);
-			var phase = 0;
-			var amp = gain.dbamp;
-			var pos = panAngle.neg / 45;
-
-			// ----
-			// synthesis
-
-			// amplitude envelope (rise, sustain, decay)
-			ampEnvSig = EnvGen.kr(
-				Env.new([0, amp, amp, 0], [riseTime, sustainTime, decayTime], curve),
-				//doneAction: Done.freeSelf
-			);
-
-			// oscillator
-			sinSig = SinOsc.ar(freq, phase, ampEnvSig * SinOsc.kr(pulseRate).range(1 - pulseDepth, 1));  // modulated amplitude
-
-			// stereo imager
-			panSig = Pan2.ar(sinSig, pos);
-
-			// assign to out
-			outSig = panSig;
-
-			Out.ar(
-				outBus,  // out bus - set as an argument
-				outSig
-			);
-		}
-	)
-
-);
-
-~myRissetBellPNotes.add(
-
-	// idiomatically Dodge & Jerse, Figure 4.5
-	/*
-	Dodge, C., & Jerse, T. A. (1997). Computer music: synthesis, composition, and performance (Second edition.). Schirmer Books.
-	*/
-	SynthDef.new(
-		\dxarts46x_dodgeJerse_fig_4_5Q,  // name - as Symbol
-
-		{ |dur = 1.0, gain = -14.0, riseTime = 0.1, decayTime = 0.1, freq = 440.0, panAngle = 0, outBus = 0|  // UGen graph function
-
-			// vars for UGens
-			var ampEnvSig;
-			var sinSig;
-			var panSig;
-			var outSig;
-
-			// vars for control
-			var phase = [ 0, 0.5pi ];  // <-- Quadrature phase makes it _more stereo_
-			var amp = gain.dbamp;
-			var pos = panAngle.neg / 45;
-
-
-			// ----
-			// synthesis
-
-			// amplitude envelope
-			ampEnvSig = EnvGen.kr(
-				Env.linen(riseTime, dur - (riseTime + decayTime), decayTime),  // Env: *linen
-				levelScale: amp,
-				// doneAction: Done.freeSelf
-			);  // EnvGen (control rate)
-
-			// oscillator
-			sinSig = SinOsc.ar(freq, phase, ampEnvSig);  // SinOsc (audio rate)
-
-			// stereo imager
-			panSig = Balance2.ar(sinSig[0], sinSig[1], pos);  // Balance2 (audio rate)  <-- use Balance for stereo signal
-
-			// assign to out
-			outSig = panSig;
-
-			Out.ar(
-				outBus,  // out bus - set as an argument
-				outSig
-			)  // Out (audio rate)
-		}
-	)
-);
-
-~myPlayBufPNotes.add (
 	SynthDef.new(
 		\dxarts46x_stereoPlayBuf,  // name - as Symbol
 
@@ -199,7 +35,7 @@ HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 
 			// amplitude envelope
 			ampEnvSig = EnvGen.kr(
-				Env.linen(riseTime, dur - (riseTime + decayTime), decayTime),  // Env: *linen
+				Env.linen(riseTime, dur - (riseTime + decayTime), decayTime, curve: \welch),  // Env: *linen
 				levelScale: amp,
 				doneAction: Done.freeSelf
 			);  // EnvGen (control rate)
@@ -225,14 +61,11 @@ HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 		}
 	),
 
-	SynthDef('reverb', { |in, out = 0|
+	SynthDef('reverb', { |in, mix = 0.7, out = 0|
 		var src;
 		src = In.ar(in, 2); // stereo buss
-		Out.ar(out, FreeVerb2.ar(src[0], src[1], 0.7, 0.7, 0.2))
-	})
-);
-
-~myRissetBellPNotes.add(
+		Out.ar(out, FreeVerb2.ar(src[0], src[1], mix, 0.7, 0.2))
+	}),
 
 	SynthDef.new(
 		\dxarts46x_percSinOsc,  // name - as Symbol
@@ -259,7 +92,7 @@ HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 			ampEnvSig = EnvGen.kr(
 				Env.perc(riseTime, decayTime, curve: curve),  // Env: *perc
 				levelScale: amp,
-				// doneAction: Done.freeSelf
+				doneAction: Done.freeSelf
 			);  // EnvGen (control rate)
 
 			// oscillator
@@ -276,90 +109,105 @@ HelpBrowser.openLink("link::Tutorials/Getting Practice/ProjectSHARCWTsWPs::")
 				outSig
 			)  // Out (audio rate)
 		}
-	)
+));
+)
+
+(
+~shuffler = CtkSynthDef(\shuffler, {|outBus = 0, bufNum, minPoint = 0, maxPoint = 0, gate = 2, gain = 0.0, winSize = 1.0, rate = 1, ris = 0.05, dec = 0.05, phase = 0.0, lpfFreq = 22000, panAngle = 0|
+
+	var env, inSig, granSig, pitchSig, filterSig, out, pan, amp;
+	var bufferDurReciprocal = BufDur.kr(bufNum).reciprocal;
+	var minPoint_ = minPoint * bufferDurReciprocal;
+	var maxPoint_ = maxPoint * bufferDurReciprocal;
+	var point, overlap;
+
+	pan = panAngle;//LFNoise2.kr(panFreq);
+	amp = dbamp(SinOsc.kr(1/30, 1.5*pi + (phase*pi)).range(-45, gain));
+	point = WhiteNoise.kr.range(minPoint, maxPoint);
+	env = EnvGen.kr(Env.asr(ris, winSize - (ris + dec), dec), gate);
+	overlap = SinOsc.kr(0.15).range(0, 1);
+	granSig = Warp1.ar(numChannels: 2, bufnum: bufNum, pointer: point, freqScale: rate, windowSize: winSize, envbufnum: -1, overlaps: 24, windowRandRatio: 0.5, interp: 4, mul: 1, add: 0);
+	granSig = Balance2.ar(granSig, granSig, pan);
+	filterSig = LPF.ar(granSig, lpfFreq);
+	out = filterSig * env * amp;
+	out = Limiter.ar(out, 0.9);
+	Out.ar(outBus, out);
+});
+);
+
+(
+~combShuffler = CtkSynthDef(\combShuffler, {|outBus = 0, bufNum, minPoint = 0, maxPoint = 0, gate = 2, gain = 0.0, winSize = 1.0, rate = 1, ris = 0.05, dec = 0.05, phase = 0.0, lpfFreq = 22000, filterFreq = 10000, panAngle = 0, overlaps = 24|
+
+	var env, inSig, granSig, pitchSig, filterSig, out, pan, amp;
+	var bufferDurReciprocal = BufDur.kr(bufNum).reciprocal;
+	var minPoint_ = minPoint * bufferDurReciprocal;
+	var maxPoint_ = maxPoint * bufferDurReciprocal;
+	var point, overlap;
+
+	pan = LFNoise2.kr(5);
+	amp = dbamp(SinOsc.kr(1/30, 1.5*pi + (phase*pi)).range(-45, gain));
+	point = WhiteNoise.kr.range(minPoint, maxPoint);
+	env = EnvGen.kr(Env.asr(ris, winSize - (ris + dec), dec), gate);
+	overlap = SinOsc.kr(0.15).range(0, 1);
+	granSig = Warp1.ar(numChannels: 2, bufnum: bufNum, pointer: point, freqScale: rate, windowSize: winSize, envbufnum: -1, overlaps: overlaps, windowRandRatio: 0.5, interp: 4, mul: 1, add: 0);
+	granSig = Balance2.ar(granSig, granSig, pan);
+	filterSig = LPF.ar(granSig, lpfFreq);
+	filterSig = CombAPL.ar(filterSig, 200.0, filterFreq, mode: \all);
+	out = filterSig * env * amp;
+	out = Limiter.ar(out, 0.9);
+	Out.ar(outBus, out);
+});
+);
+
+(
+~percyEnv = Env.perc(0.01, 0.5 - 0.01, -4);
+~z = Buffer.sendCollection(s, ~percyEnv.discretize, 1);
+~dual = CtkSynthDef(\dual, { |outBus = 0, bufnum = 0,
+	gain = -6,           // dB  (-6 is reasonable; +10 will distort)
+	grainDur = 0.2, dustFreq = 5,
+	grainPos = 0.5, grainRand = 0.0,
+	mix = 0.0, rate = 1,                     // playback speed for GrainBuf
+	envBufnum, env, freq = 1000, panAngle = 0.0|
+
+	var trig  = Dust.kr(dustFreq);
+	var sig, panSig;
+
+	// reference sine blip
+	var sineEnv  = EnvGen.kr(~percyEnv, trig);
+	var sineBlip = SinOsc.ar(freq) * sineEnv * 0.15;
+
+	var randPos = Rand(grainPos - grainRand, grainPos + grainRand);
+
+	var panPos = -1 * (panAngle.neg / 45);
+
+	// grain from buffer (mono)
+	var grainBlip = GrainBuf.ar(
+		numChannels: 1,
+		trigger: trig,
+		dur: grainDur,
+		sndbuf: bufnum,
+		rate: rate,
+		envbufnum: ~z,
+		pos: TRand.kr(0.0, 1.0, trig),
+		interp: 2        // 4-point Lagrange
+	);
+
+	grainBlip = BPF.ar(grainBlip, freq);
+
+	// equal-power cross-fade
+	sig = (sineBlip * mix.sqrt) + (grainBlip * 2 * (1 - mix).sqrt);
+
+	sig = sig * gain.dbamp;        // apply global gain
+	sig = Limiter.ar(sig, 0.9);
+
+	panSig = Pan2.ar(sig, panPos);
+	Out.ar(outBus, panSig);       // stereo
+});
 );
 
 
-~myWarp1ShufflePNotes.add(
-	/*
-	Enveloped mono Warp1 - with offset start position, optimised for Brassage / Shuffling
-	*/
-	SynthDef.new(
-		\dxarts46x_stereoWarp1Shuffle,  // name - as Symbol
-
-		{ |dur = 1.0, gain = 0.0, riseTime = 0.01, decayTime = 0.01,
-			minWinDur = 1.0, maxWinDur = 1.0,
-			minSkipTime = 0.0, maxSkipTime = 0.0,
-			minRate = 1, maxRate = 1,
-			minDensity = 1, maxDensity = 4,
-			winRand = 0.0,
-			interp = 4,
-			filterFreqHPF = 20,
-			panAngle = 0,
-			bufnum = 0,
-			outBus = 0|  // UGen graph function
-
-			// vars for UGens
-			var ampEnvSig;
-			var shuffleSig;
-			var panSig;
-			var outSig;
-
-			// vars for control
-			var numChannels = 2; // <-- stereo buffer - must be set in the UGen graph function!
-			var amp = gain.dbamp;
-			var pos = panAngle.neg / 45;
-			var bufferDurReciprocal = BufDur.kr(bufnum).reciprocal;
-			var minPoint = minSkipTime * bufferDurReciprocal;
-			var maxPoint = maxSkipTime * bufferDurReciprocal;
-			var pointerSig, winDurSig, densitySig, rateSig;
-
-			// ----
-			// synthesis
-
-			// shuffler control
-			pointerSig = WhiteNoise.kr.range(minPoint, maxPoint);
-			winDurSig = WhiteNoise.kr.range(minWinDur, maxWinDur);
-			densitySig = WhiteNoise.kr.range(minDensity, maxDensity);
-			rateSig = WhiteNoise.kr.range(minRate, maxRate);
 
 
-			// amplitude envelope
-			ampEnvSig = EnvGen.kr(
-				Env.linen(riseTime, dur - (riseTime + decayTime), decayTime),  // Env: *linen
-				levelScale: amp,
-			);  // EnvGen (control rate)
 
 
-			// sample shuffle playback
-			shuffleSig = Warp1.ar(
-				numChannels: numChannels,
-				bufnum: bufnum,
-				pointer: pointerSig,
-				freqScale: rateSig,
-				windowSize: winDurSig,
-				overlaps: densitySig,
-				windowRandRatio: winRand,
-				interp: interp,
-			);
 
-			shuffleSig = HPF.ar(shuffleSig, filterFreqHPF);
-
-			// apply -linen envelope
-			// ... reuse playBufSig var
-			// NOTE: we could have just passed ampEnvSig to the level arg of Balance2
-			shuffleSig = shuffleSig * ampEnvSig;
-
-			// stereo imager
-			panSig = Balance2.ar(shuffleSig[0], shuffleSig[1], pos);  // Balance2 (audio rate)
-
-			// assign to out
-			outSig = panSig;
-
-			Out.ar(
-				outBus,  // out bus - set as an argument
-				outSig
-			)  // Out (audio rate)
-		}
-	)
-);
