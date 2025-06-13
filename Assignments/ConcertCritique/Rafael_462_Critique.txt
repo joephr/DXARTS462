@@ -1,0 +1,32 @@
+Firstly, I thought some blippy timbres present in Turenas were similar to that of the beginning of
+Truax’s Riverrun or other time segment processing forward works such as Blackburn’s Ice Breaker or
+Risset’s Sud. I find this interesting because while crisp natural sounds of water, shells, wood,
+etc. in Riverrun and Ice Breaker were exclusively done through granular synthesis, Turenas involved
+the FM synthesis of such “natural” timbres instead. Though Chowning stated that the FM synthesis
+context of the piece was just the “technical background” and that “the piece is not about the
+background”, I still think that his decision to synthesize his natural timbres instead of using
+recordings adds to the piece itself. I think about how just like Truax, Risset, Blackburn, Chowning
+was guided and inspired by perhaps the liveliness of natural sounds and especially water sounds.
+Additionally, to contrast the granulation and synthesis of natural sounds, in say Riverrun, Truax
+granulates natural sounds into something that sounds synthesized whereas Chowning sculpts his
+synthesis to sound natural. The original timbre of the water is still heard in the grains of
+Riverrun and of course the synthesis of Turenas never fully replicate something completely natural,
+leading to sounds that are similar to each other in idea or concept and broad timbre, but different
+in a very nuanced way.
+
+Secondly, I’d like to compare Chowning’s Voices for Soprano and Interactive Computer v.3 and
+Embosquecerse by Juan Pampin and Abigail Jara. Both pieces involve a live performance element as well
+as a synthesis element that is influenced by the live performance. For Embosquecerse, it’s dancers
+wearing sensors that track their movements and for Voices for Soprano and Interactive Computer v.3,
+it was Maureen Chowning’s voice. John did talk broadly about his stack/setup for the piece,
+specializing the soprano’s voice with FM synthesized background vocals matching that of the
+soprano’s “target pitch”. If I were to attempt something similar using my knowledge in
+SuperCollider, it would probably rely on our machine listening tools and concepts. There should be
+a pitch tracker that sends pitch information which is then used as an argument in a synthdef that
+sounds like human singing voices. Perhaps for my skill level and lack of synthesis expertise, this
+might involve pitch shifted vocal samples instead that are perhaps distorted to sound less natural
+or perhaps as if they were synthesized. Additionally, while I’m not sure how exactly the sort of
+granular noise was produced in the background, I’d attempt to recreate it by collecting amplitude
+data and which is sent to a synthdef that creates that noise that creates more noise somewhat
+proportional to how loud the soprano’s voice is. This all of course is taken with a microphone as
+an input.
